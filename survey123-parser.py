@@ -1,5 +1,8 @@
 import pandas as pd
 from dateparser import *
+import seaborn as sn
+import matplotlib.pyplot as plt
+
 def clean(survey,drop_nans=True):
     
     survey123 = pd.read_csv(survey)#convert survey123 data into dataframe
@@ -88,11 +91,24 @@ def clean(survey,drop_nans=True):
 
         i+=1
     df['Coverage Density'] = [float(c) for c in df['Coverage Density']]
+    df = df.drop('Bottom Type',axis=1)
+    df = df.rename(columns={'bottomtype_int':'Bottom Type'})
+    
     #Drop NaN values if drop_nans == True
     BottomDf=df.dropna(subset = ["Bottom Type"])
+    BottomDf = BottomDf.drop('Coverage Density',axis=1)
+    
     CovDensDf=df.dropna(subset = ["Coverage Density"])
-    BottomDf.to_csv('bottomtype_survey.csv')
-    CovDensDf.to_csv('coveragedensity_survey.csv')
+    CovDensDf=CovDensDf.drop('Bottom Type',axis=1)
+    
+    #BottomDf.to_csv('bottomtype_survey.csv')
+    #CovDensDf.to_csv('coveragedensity_survey.csv')
+    
     if drop_nans == True:
         df = df.dropna()
     return df
+df = clean('surveyPoint_1.csv')
+df = df[(df['CreationDate'] > parse('2020-1-1 01:00:00')) & (df['CreationDate'] <= parse('2020-10-18 4:00:00'))]
+corrMatrix = df.corr()
+sn.heatmap(corrMatrix, annot=True)
+plt.show()
